@@ -17,6 +17,8 @@ func createNotificationHandler(w http.ResponseWriter, r *http.Request) {
 	var notificationCreationRequest NotificationCreationRequest
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&notificationCreationRequest)
+	defer r.Body.Close()
+
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -28,9 +30,9 @@ func createNotificationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input := internal.CreateNotificationInput{
-		RepositoryUrl: notificationCreationRequest.RepositoryUrl,
-		Label: notificationCreationRequest.Label,
-		Email: notificationCreationRequest.Email,
+		RepositoryUrl:	notificationCreationRequest.RepositoryUrl,
+		Label: 			notificationCreationRequest.Label,
+		Email: 			notificationCreationRequest.Email,
 
 	}
 	notificationCreationResult := internal.CreateNotification(input)

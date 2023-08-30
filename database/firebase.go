@@ -9,19 +9,20 @@ import (
 	"google.golang.org/api/option"
 )
 
-func Firebase() (*firestore.Client, error) {
-	ctx := context.Background()
-	sa := option.WithCredentialsFile("path/to/serviceAccount.json")
-	app, err := firebase.NewApp(ctx, nil, sa)
+func Firebase() *firestore.Client {
+	context := context.Background()
+	// TODO: move this to .env
+	sa := option.WithCredentialsFile("firebaseServiceAccount.json")
+	app, err := firebase.NewApp(context, nil, sa)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	client, err := app.Firestore(ctx)
+	client, err := app.Firestore(context)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	return client, nil
+	return client
 }
