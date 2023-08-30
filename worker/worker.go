@@ -1,0 +1,6 @@
+package worker
+
+
+func InitiNotificationWorker() {
+
+}
