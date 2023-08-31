@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  app:
+    build: ./
+    volumes:
+      - ./:/notificator
+    environment:
+      NOTIFICATOR_ENV: development
+    ports:
+      - 8081:8081
+    logging:
+      driver: local
+
+  smtp:
+    image: ixdotai/smtp:latest

@@ -12,6 +12,8 @@ import (
 const HTTP_PORT = ":8081"
 
 func InitServer(app *core.App) {
+	log.Println("starting server...")
+
 	http.HandleFunc("/notifications", createNotificationHandler)
 
 	log.Fatal(http.ListenAndServe(HTTP_PORT, nil))

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
@@ -11,10 +12,16 @@ import (
 	"github.com/yugarinn/github-issues-notificator/database"
 )
 
+type NotificationFilters struct {
+	Author		string
+	Assignee	string
+	Label 		string
+	Title 		string
+}
 
 type CreateNotificationInput struct {
 	RepositoryUrl string
-	Label         string
+	Filters       NotificationFilters
 	Email         string
 }
 
@@ -24,6 +31,13 @@ type CreateNotificationResult struct {
 }
 
 func CreateNotification(input CreateNotificationInput) CreateNotificationResult {
+	if repositoryExists(input.RepositoryUrl) == false {
+		return CreateNotificationResult{
+			Success: false,
+			Error: errors.New("provided_repository_not_found"),
+		}
+	}
+
 	context := context.Background()
 	firebase := database.Firebase()
 
@@ -32,7 +46,7 @@ func CreateNotification(input CreateNotificationInput) CreateNotificationResult 
 	notification := map[string]interface{}{
 		"repositoryUrl": 	input.RepositoryUrl,
 		"email": 			input.Email,
-		"filters": 			fmt.Sprintf("label.%s,", input.Label),
+		"filters": 			input.Filters,
 		"confirmationCode":	generateNotificationConfirmationCode(&input),
 		"isConfirmed": 		false,
 		"createdAt":        now,
@@ -47,12 +61,17 @@ func CreateNotification(input CreateNotificationInput) CreateNotificationResult 
 	}
 }
 
+// TODO
+func repositoryExists(repositoryUrl string) bool {
+	return true
+}
+
 func generateNotificationConfirmationCode(input *CreateNotificationInput) string {
 	bytes := make([]byte, 16)
 	rand.Read(bytes)
 
 	baseString := hex.EncodeToString(bytes)
-	baseCode := fmt.Sprintf("%s-%s-%s-%s", input.RepositoryUrl, input.Email, input.Label, baseString)
+	baseCode := fmt.Sprintf("%s-%s-%s", input.RepositoryUrl, input.Email, baseString)
 
 	hash := sha256.New()
 	hash.Write([]byte(baseCode))

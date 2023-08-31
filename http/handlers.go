@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/yugarinn/github-issues-notificator/internal"
@@ -24,21 +25,28 @@ func createNotificationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if notificationCreationRequest.RepositoryUrl == "" || notificationCreationRequest.Label == "" || notificationCreationRequest.Email == "" {
+	if notificationCreationRequest.RepositoryUrl == "" || notificationCreationRequest.Email == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
 
+	filters := internal.NotificationFilters{
+		Author:		notificationCreationRequest.Filters.Author,
+		Assignee:	notificationCreationRequest.Filters.Assignee,
+		Label:		notificationCreationRequest.Filters.Label,
+		Title:		notificationCreationRequest.Filters.Title,
+	}
+
 	input := internal.CreateNotificationInput{
 		RepositoryUrl:	notificationCreationRequest.RepositoryUrl,
-		Label: 			notificationCreationRequest.Label,
 		Email: 			notificationCreationRequest.Email,
+		Filters:		filters,
 
 	}
 	notificationCreationResult := internal.CreateNotification(input)
 
 	if notificationCreationResult.Error != nil {
-		http.Error(w, "Error on notification creation", http.StatusUnprocessableEntity)
+		http.Error(w, fmt.Sprintf("Error on notification creation: %s.", notificationCreationResult.Error), http.StatusUnprocessableEntity)
 		return
 	}
 
