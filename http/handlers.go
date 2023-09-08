@@ -25,7 +25,7 @@ func createNotificationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if notificationCreationRequest.RepositoryUrl == "" || notificationCreationRequest.Email == "" {
+	if notificationCreationRequest.RepositoryUri == "" || notificationCreationRequest.Email == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
@@ -38,7 +38,7 @@ func createNotificationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input := internal.CreateNotificationInput{
-		RepositoryUrl:	notificationCreationRequest.RepositoryUrl,
+		RepositoryUri:	notificationCreationRequest.RepositoryUri,
 		Email: 			notificationCreationRequest.Email,
 		Filters:		filters,
 

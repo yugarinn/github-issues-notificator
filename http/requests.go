@@ -9,7 +9,7 @@ type Filters struct {
 }
 
 type NotificationCreationRequest struct {
-	RepositoryUrl string 	`json:"repositoryUrl"`
+	RepositoryUri string 	`json:"repositoryUri"`
 	Email         string 	`json:"email"`
 	Filters       Filters	`json:"filters"`
 }

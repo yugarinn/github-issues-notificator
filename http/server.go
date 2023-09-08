@@ -14,7 +14,10 @@ const HTTP_PORT = ":8081"
 func InitServer(app *core.App) {
 	log.Println("starting server...")
 
-	http.HandleFunc("/notifications", createNotificationHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/notifications", createNotificationHandler)
 
-	log.Fatal(http.ListenAndServe(HTTP_PORT, nil))
+	handler := MiddlewareStack(mux)
+
+	log.Fatal(http.ListenAndServe(HTTP_PORT, handler))
 }

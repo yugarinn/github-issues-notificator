@@ -20,7 +20,7 @@ type NotificationFilters struct {
 }
 
 type CreateNotificationInput struct {
-	RepositoryUrl string
+	RepositoryUri string
 	Filters       NotificationFilters
 	Email         string
 }
@@ -31,7 +31,7 @@ type CreateNotificationResult struct {
 }
 
 func CreateNotification(input CreateNotificationInput) CreateNotificationResult {
-	if repositoryExists(input.RepositoryUrl) == false {
+	if repositoryExists(input.RepositoryUri) == false {
 		return CreateNotificationResult{
 			Success: false,
 			Error: errors.New("provided_repository_not_found"),
@@ -44,7 +44,7 @@ func CreateNotification(input CreateNotificationInput) CreateNotificationResult 
 	now := time.Now()
 
 	notification := map[string]interface{}{
-		"repositoryUrl": 	input.RepositoryUrl,
+		"repositoryUri": 	input.RepositoryUri,
 		"email": 			input.Email,
 		"filters": 			input.Filters,
 		"confirmationCode":	generateNotificationConfirmationCode(&input),
@@ -62,7 +62,7 @@ func CreateNotification(input CreateNotificationInput) CreateNotificationResult 
 }
 
 // TODO
-func repositoryExists(repositoryUrl string) bool {
+func repositoryExists(repositoryUri string) bool {
 	return true
 }
 
@@ -71,7 +71,7 @@ func generateNotificationConfirmationCode(input *CreateNotificationInput) string
 	rand.Read(bytes)
 
 	baseString := hex.EncodeToString(bytes)
-	baseCode := fmt.Sprintf("%s-%s-%s", input.RepositoryUrl, input.Email, baseString)
+	baseCode := fmt.Sprintf("%s-%s-%s", input.RepositoryUri, input.Email, baseString)
 
 	hash := sha256.New()
 	hash.Write([]byte(baseCode))
