@@ -2,11 +2,12 @@ package internal
 
 import (
 	"context"
-	"errors"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/yugarinn/github-issues-notificator/database"
@@ -61,8 +62,14 @@ func CreateNotification(input CreateNotificationInput) CreateNotificationResult 
 	}
 }
 
-// TODO
 func repositoryExists(repositoryUri string) bool {
+	url := fmt.Sprintf("https://github.com%s", repositoryUri)
+	response, err := http.Get(url)
+
+	if response.StatusCode != 200 || err != nil {
+		return false
+	}
+
 	return true
 }
 
