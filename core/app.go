@@ -1,7 +1,7 @@
 package core
 
 import (
-	"cloud.google.com/go/firestore"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/yugarinn/github-issues-notificator/database"
 	"github.com/yugarinn/github-issues-notificator/lib"
@@ -9,14 +9,14 @@ import (
 
 
 type App struct {
-	Database *firestore.Client
+	Database *mongo.Database
 	GithubClient *lib.GithubClient
 	EmailClient *lib.EmailClient
 }
 
 func BootstrapApplication() *App {
     app := App{
-		Database: database.Firebase(),
+		Database: database.Database(),
 		GithubClient: &lib.GithubClient{},
 		EmailClient: &lib.EmailClient{},
     }

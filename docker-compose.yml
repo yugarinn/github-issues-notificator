@@ -12,5 +12,19 @@ services:
     logging:
       driver: local
 
+  mongodb:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME = gin
+      - MONGO_INITDB_ROOT_PASSWORD = s3cr3t
+      - MONGO_INITDB_DATABASE = githubIssuesNotificator
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data:/data/db
+
   smtp:
     image: ixdotai/smtp:latest
+
+volumes:
+  mongodb_data:

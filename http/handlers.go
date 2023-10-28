@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/yugarinn/github-issues-notificator/core"
 	"github.com/yugarinn/github-issues-notificator/internal"
 )
 
 
-func createNotificationHandler(w http.ResponseWriter, r *http.Request) {
+func createNotificationHandler(app *core.App, w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -43,7 +44,7 @@ func createNotificationHandler(w http.ResponseWriter, r *http.Request) {
 		Filters:		filters,
 
 	}
-	notificationCreationResult := internal.CreateNotification(input)
+	notificationCreationResult := internal.CreateNotification(app, input)
 
 	if notificationCreationResult.Error != nil {
 		http.Error(w, fmt.Sprintf("Error on notification creation: %s.", notificationCreationResult.Error), http.StatusUnprocessableEntity)

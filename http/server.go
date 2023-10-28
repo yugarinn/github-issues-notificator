@@ -15,7 +15,9 @@ func InitServer(app *core.App) {
 	log.Println("starting server...")
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/notifications", createNotificationHandler)
+	mux.HandleFunc("/notifications", func(w http.ResponseWriter, r *http.Request) {
+		createNotificationHandler(app, w, r)
+	})
 
 	handler := MiddlewareStack(mux)
 

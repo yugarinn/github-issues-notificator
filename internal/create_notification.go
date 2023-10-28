@@ -10,15 +10,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/yugarinn/github-issues-notificator/database"
+	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/yugarinn/github-issues-notificator/core"
 )
 
-type NotificationFilters struct {
-	Author		string
-	Assignee	string
-	Label 		string
-	Title 		string
-}
 
 type CreateNotificationInput struct {
 	RepositoryUri string
@@ -31,7 +27,9 @@ type CreateNotificationResult struct {
 	Error        error
 }
 
-func CreateNotification(input CreateNotificationInput) CreateNotificationResult {
+func CreateNotification(app *core.App, input CreateNotificationInput) CreateNotificationResult {
+	ctx := context.Background()
+
 	if repositoryExists(input.RepositoryUri) == false {
 		return CreateNotificationResult{
 			Success: false,
@@ -39,26 +37,25 @@ func CreateNotification(input CreateNotificationInput) CreateNotificationResult 
 		}
 	}
 
-	context := context.Background()
-	firebase := database.Firebase()
-
 	now := time.Now()
 
-	notification := map[string]interface{}{
-		"repositoryUri": 	input.RepositoryUri,
-		"email": 			input.Email,
-		"filters": 			input.Filters,
-		"confirmationCode":	generateNotificationConfirmationCode(&input),
-		"isConfirmed": 		false,
+	collection := app.Database.Collection("notifications")
+
+	notification := bson.M{
+		"repositoryUri":    input.RepositoryUri,
+		"email":            input.Email,
+		"filters":          input.Filters,
+		"confirmationCode": generateNotificationConfirmationCode(&input),
+		"isConfirmed":      false,
 		"createdAt":        now,
 		"updatedAt":        now,
 	}
 
-	_, error := firebase.Collection("notifications").NewDoc().Create(context, notification)
+	_, err := collection.InsertOne(ctx, notification)
 
 	return CreateNotificationResult{
-		Success: error != nil,
-		Error: error,
+		Success: err != nil,
+		Error: err,
 	}
 }
 
@@ -66,7 +63,7 @@ func repositoryExists(repositoryUri string) bool {
 	url := fmt.Sprintf("https://github.com%s", repositoryUri)
 	response, err := http.Get(url)
 
-	if response.StatusCode != 200 || err != nil {
+	if err != nil || response.StatusCode != 200 {
 		return false
 	}
 
