@@ -47,6 +47,7 @@ func CreateNotification(app *core.App, input CreateNotificationInput) CreateNoti
 		"filters":          input.Filters,
 		"confirmationCode": generateNotificationConfirmationCode(&input),
 		"isConfirmed":      false,
+		"lastCheckAt":      nil,
 		"createdAt":        now,
 		"updatedAt":        now,
 	}
@@ -60,7 +61,7 @@ func CreateNotification(app *core.App, input CreateNotificationInput) CreateNoti
 }
 
 func repositoryExists(repositoryUri string) bool {
-	url := fmt.Sprintf("https://github.com%s", repositoryUri)
+	url := fmt.Sprintf("https://github.com/%s", repositoryUri)
 	response, err := http.Get(url)
 
 	if err != nil || response.StatusCode != 200 {

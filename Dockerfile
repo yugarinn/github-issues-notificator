@@ -2,8 +2,8 @@ FROM golang:1.20
 
 ENV GOPATH=/go
 
-RUN mkdir /notificator
-WORKDIR /notificator
+RUN mkdir /github-issues-notificator
+WORKDIR /github-issues-notificator
 
 ADD go.mod ./go.mod
 ADD go.sum ./go.sum

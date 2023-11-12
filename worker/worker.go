@@ -11,14 +11,17 @@ import (
 
 	"github.com/yugarinn/github-issues-notificator/core"
 	"github.com/yugarinn/github-issues-notificator/internal"
+	"github.com/yugarinn/github-issues-notificator/lib"
 )
 
 
 func InitiNotificationWorker(app *core.App) {
-	c := cron.New()
-	atEveryMinute := "* * * * *"
+	lib.LoadEnvFile()
 
-	cronID, cronError := c.AddFunc(atEveryMinute, func() {
+	c := cron.New()
+	cronFrequency := os.Getenv("WORKER_CRON_FREQUENCY")
+
+	cronID, cronError := c.AddFunc(cronFrequency, func() {
 		log.Println("checking for new issues...")
 		internal.SendNotifications(app)
 		log.Println("checking for new issues... done")
