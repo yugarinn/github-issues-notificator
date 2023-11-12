@@ -4,6 +4,6 @@
 tmp/
 
 firebaseServiceAccount.json
-bin/*
+bin/github-issues-notificator
 
 .env
