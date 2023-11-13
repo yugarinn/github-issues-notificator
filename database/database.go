@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"os"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -16,8 +17,9 @@ var ctx = context.Background()
 
 func Database() *mongo.Database {
 	ctx := context.Background()
+	databaseUrl := os.Getenv("DATABASE_URL")
 
-	clientOptions := options.Client().ApplyURI("mongodb://mongodb:27017/githubIssuesNotificator?authSource=admin")
+	clientOptions := options.Client().ApplyURI(databaseUrl)
 	client, err := mongo.Connect(ctx, clientOptions)
 
 	if err != nil {
