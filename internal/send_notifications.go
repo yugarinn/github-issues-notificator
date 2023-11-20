@@ -13,6 +13,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/exp/slices"
 
 	"github.com/yugarinn/github-issues-notificator/core"
 )
@@ -42,15 +43,16 @@ func SendNotifications(app *core.App) {
 		}
 
 		issues, _ := retrieveIssuesFor(notification)
+		newIssues := filterAlreadyNotifiedIssuesFor(app, issues, notification)
 
-		for _, issue := range issues {
+		for _, issue := range newIssues {
 			err := sendIssueEmailAlertTo(issue, notification)
 
 			if (err != nil) {
 				// TODO: add proper logging
 				fmt.Println(err)
 			} else {
-				updateNotificationLastCheckAt(app, notification)
+				updateNotificationTimestamps(app, notification, issue)
 			}
 		}
 	}
@@ -83,15 +85,50 @@ func retrieveIssuesFor(notification Notification) ([]GithubIssue, error) {
 	return issues, nil
 }
 
+func filterAlreadyNotifiedIssuesFor(app *core.App, issues []GithubIssue, notification Notification) []GithubIssue {
+	var filteredIssues []GithubIssue
+	alreadyNotifiedIssuesIDs, _ := getNotifiedIssuesFor(app, notification.ID)
+
+	for _, issue := range issues {
+		if !slices.Contains(alreadyNotifiedIssuesIDs, issue.ID) {
+			filteredIssues = append(filteredIssues, issue)
+		}
+	}
+
+	return filteredIssues
+}
+
+func getNotifiedIssuesFor(app *core.App, notificationID string) ([]int64, error) {
+    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+    defer cancel()
+
+    collection := app.Database.Collection("notifications")
+    objID, err := primitive.ObjectIDFromHex(notificationID)
+
+    if err != nil {
+        return nil, err
+    }
+
+    var notification Notification
+
+    err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&notification)
+
+    if err != nil {
+        return nil, err
+    }
+
+    return notification.NotifiedIssues, nil
+}
+
 func getIssuesUrlFor(notification Notification) string {
-	issueUrl := fmt.Sprintf("https://api.github.com/repos/%s/issues?labels=%s", notification.RepositoryUri, url.QueryEscape(notification.Filters.Label))
+	issuesUrl := fmt.Sprintf("https://api.github.com/repos/%s/issues?labels=%s", notification.RepositoryUri, url.QueryEscape(notification.Filters.Label))
 
 	if !notification.LastCheckAt.IsZero() {
 		formattedTime := notification.LastCheckAt.Format(time.RFC3339)
-		issueUrl += "&since=" + url.QueryEscape(formattedTime)
+		issuesUrl += "&since=" + url.QueryEscape(formattedTime)
 	}
 
-	return issueUrl
+	return issuesUrl
 }
 
 func sendIssueEmailAlertTo(issue GithubIssue, notification Notification) error {
@@ -130,7 +167,7 @@ func buildAlertEmailBody(issue GithubIssue) string {
 	return fmt.Sprintf("New issue in %s<br/><br/><a href=\"%s\" target=\"_blank\">%s</a>", issue.RepositoryUrl, issue.Url, issue.Title)
 }
 
-func updateNotificationLastCheckAt(app *core.App, notification Notification) {
+func updateNotificationTimestamps(app *core.App, notification Notification, issue GithubIssue) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -138,7 +175,10 @@ func updateNotificationLastCheckAt(app *core.App, notification Notification) {
 
 	notificationID, _ := primitive.ObjectIDFromHex(notification.ID)
 	filter := bson.M{"_id": notificationID}
-	update := bson.M{"$set": bson.M{"lastCheckAt": time.Now()}}
+	update := bson.M{
+		"$set": bson.M{"lastCheckAt": time.Now()},
+		"$push": bson.M{"notifiedIssues": issue.ID},
+	}
 
 	_, err := collection.UpdateOne(ctx, filter, update)
 	if err != nil {
