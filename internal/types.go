@@ -22,7 +22,7 @@ type NotificationFilters struct {
 }
 
 type GithubIssue struct {
-	ID 				int64 `json:"id"`
+	ID              int64 `json:"id"`
 	Title 			string `json:"title"`
 	RepositoryUrl 	string `json:"repository_url"`
 	Url 			string `json:"html_url"`
