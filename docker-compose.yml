@@ -44,7 +44,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     depends_on:
-      - gin-statsd
+      - gin-statsd_exporter
 
   gin-grafana:
     image: grafana/grafana:7.1.0
