@@ -14,12 +14,21 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/exp/slices"
+    "github.com/cactus/go-statsd-client/v5/statsd"
 
 	"github.com/yugarinn/github-issues-notificator/core"
 )
 
 
 func SendNotifications(app *core.App) {
+	var sentNotifications int
+
+    config := &statsd.ClientConfig{
+        Address: "statsd_exporter:9125",
+        Prefix: "gin",
+    }
+	client, _ := statsd.NewClientWithConfig(config)
+
 	ctx := context.Background()
 	collection := app.Database.Collection("notifications")
 
@@ -53,9 +62,12 @@ func SendNotifications(app *core.App) {
 				fmt.Println(err)
 			} else {
 				updateNotificationTimestamps(app, notification, issue)
+				sentNotifications += 1
 			}
 		}
 	}
+
+	client.Inc("sent_notifications", int64(sentNotifications), 1.0)
 }
 
 func retrieveIssuesFor(notification Notification) ([]GithubIssue, error) {

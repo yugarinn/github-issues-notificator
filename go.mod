@@ -3,6 +3,7 @@ module github.com/yugarinn/github-issues-notificator
 go 1.20
 
 require (
+	github.com/cactus/go-statsd-client/v5 v5.1.0
 	github.com/joho/godotenv v1.5.1
 	github.com/robfig/cron/v3 v3.0.1
 	go.mongodb.org/mongo-driver v1.12.1

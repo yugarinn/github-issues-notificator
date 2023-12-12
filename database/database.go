@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -18,6 +19,8 @@ var ctx = context.Background()
 func Database() *mongo.Database {
 	ctx := context.Background()
 	databaseUrl := os.Getenv("DATABASE_URL")
+
+	fmt.Println(databaseUrl)
 
 	clientOptions := options.Client().ApplyURI(databaseUrl)
 	client, err := mongo.Connect(ctx, clientOptions)

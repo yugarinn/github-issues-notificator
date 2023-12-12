@@ -17,8 +17,6 @@ RUN chmod +x /usr/local/bin/wait
 # Install dev dependencies
 RUN go mod download && go mod verify
 RUN go install github.com/githubnemo/CompileDaemon@latest
-RUN go install gotest.tools/gotestsum@latest
-RUN go install github.com/codegangsta/gin@latest
 
 ENV NOTIFICATOR_ENV=development
 EXPOSE 3000

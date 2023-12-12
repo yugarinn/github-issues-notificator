@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  app:
+  gin:
     build: ./
     volumes:
       - ./:/github-issues-notificator
@@ -12,19 +12,50 @@ services:
     logging:
       driver: local
 
-  mongodb:
-    image: mongo:latest
+  gin-mongodb:
+    image: mongo:6.0
     environment:
-      - MONGO_INITDB_ROOT_USERNAME = gin
-      - MONGO_INITDB_ROOT_PASSWORD = s3cr3t
-      - MONGO_INITDB_DATABASE = githubIssuesNotificator
+      - MONGO_INITDB_DATABASE=admin
+      - MONGO_INITDB_ROOT_USERNAME=${DATABASE_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DATABASE_PASSWORD}
     ports:
       - 27017:27017
     volumes:
       - mongodb_data:/data/db
 
-  smtp:
-    image: ixdotai/smtp:latest
+  gin-statsd_exporter:
+    image: prom/statsd-exporter
+    ports:
+      - "9102:9102"
+      - "9125:9125/udp"
+    command:
+      - '--statsd.listen-udp=:9125'
+      - '--web.listen-address=:9102'
+    depends_on:
+      - app
+
+  gin-prometheus:
+    image: prom/prometheus:v2.20.1
+    volumes:
+      - ./docker/prometheus:/etc/prometheus
+    ports:
+      - 9090:9090
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    depends_on:
+      - statsd
+
+  gin-grafana:
+    image: grafana/grafana:7.1.0
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
 
 volumes:
   mongodb_data:
+  grafana_data:
+  prometheus_data:
