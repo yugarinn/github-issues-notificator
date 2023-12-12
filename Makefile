@@ -4,7 +4,7 @@ up:
 	@${DC} up --build
 
 up-prod:
-	@${DC} up --build
+	@${DC} up --build -d
 
 down:
 	@${DC} down
