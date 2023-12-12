@@ -32,7 +32,7 @@ services:
       - '--statsd.listen-udp=:9125'
       - '--web.listen-address=:9102'
     depends_on:
-      - app
+      - gin
 
   gin-prometheus:
     image: prom/prometheus:v2.20.1
@@ -44,14 +44,14 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     depends_on:
-      - statsd
+      - gin-statsd
 
   gin-grafana:
     image: grafana/grafana:7.1.0
     ports:
       - 3000:3000
     depends_on:
-      - prometheus
+      - gin-prometheus
     volumes:
       - grafana_data:/var/lib/grafana
 

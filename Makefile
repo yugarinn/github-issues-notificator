@@ -3,6 +3,9 @@ DC = docker compose -f docker-compose.yml
 up:
 	@${DC} up --build
 
+up-prod:
+	@${DC} up --build
+
 down:
 	@${DC} down
 
