@@ -13,7 +13,7 @@ shell:
 	@${DC} run --rm -it app bash -l
 
 test:
-	@${DC} run -e NOTIFICATOR_ENV=test app /go/bin/gotestsum --format testname ./tests/feature
+	@${DC} run -e GIN_ENV=test app /go/bin/gotestsum --format testname ./tests/feature
 
 build_for_production:
-	NOTIFICATOR_ENV=production go build
+	GIN_ENV=production go build

@@ -6,7 +6,7 @@ services:
     volumes:
       - ./:/github-issues-notificator
     environment:
-      NOTIFICATOR_ENV: development
+      GIN_ENV: ${GIN_ENV}
     ports:
       - 8081:8081
     logging:
@@ -21,7 +21,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data:/data/db
+      - ${DATABASE_VOLUME_PATH}:/data/db
 
   gin-statsd_exporter:
     image: prom/statsd-exporter
