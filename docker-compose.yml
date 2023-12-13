@@ -13,7 +13,7 @@ services:
       driver: local
 
   gin-mongodb:
-    image: mongo:6.0
+    image: mongo:5.3
     environment:
       - MONGO_INITDB_DATABASE=admin
       - MONGO_INITDB_ROOT_USERNAME=${DATABASE_USER}
